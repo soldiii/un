@@ -1,0 +1,109 @@
+#include <iostream>
+#include <vector>
+#include <locale.h>
+using namespace std;
+
+void print(vector<bool> input_bit)
+{
+	for (int i = 0; i < 16; i++)
+	{
+		if (i == 8) cout << " ";
+		cout << input_bit[i];
+	}
+	cout << endl;
+}
+void stirring(vector<vector<int>> G, vector<bool>& input_bit)
+{
+	vector<bool> output_bit(16);
+	for (int i = 0; i < 16; i++)
+	{
+		output_bit[i] = input_bit[G[i / 4][i % 4] - 1];
+	}
+	input_bit = output_bit;
+}
+
+void shift(vector<bool>& input_bit, const bool& flag)
+{
+	vector<bool> input_bit1(input_bit.begin(), input_bit.begin() + 8);
+	vector<bool> input_bit2(input_bit.begin() + 8, input_bit.begin() + 16);
+	vector<bool> output_bit1(8);
+	vector<bool> output_bit2(8);
+	if (flag == false) {
+		for (int i = 0; i < 8; i++)
+		{
+			output_bit1[i] = input_bit1[(i + 1) % 8];
+			output_bit2[i] = input_bit2[(i + 1) % 8];
+		}
+		input_bit = output_bit1;
+		input_bit.insert(input_bit.end(), output_bit2.begin(), output_bit2.end());
+	}
+	else {
+		for (int i = 0; i < 8; i++)
+		{
+			output_bit1[i] = input_bit1[(i + 1) % 8];
+			output_bit2[i] = input_bit2[(i + 1) % 8];
+		}
+		input_bit = output_bit1;
+		input_bit.insert(input_bit.end(), output_bit2.begin(), output_bit2.end());
+		shift(input_bit, false);
+	}
+}
+int main()
+{
+	bool flag = false;
+	vector<vector<int>> G =
+	{
+		{13,10,5,2},
+		{7,14,11,6},
+		{3,8,15,12},
+		{1,4,9,16}
+	};
+
+	vector<vector<int>> H =
+	{
+		{16,4,1,10},
+		{8,11,15,3},
+		{5,14,2,12},
+		{7,13,9,6}
+	};
+
+	setlocale(LC_ALL, "Russian");
+	vector <bool> input_bit;
+	cout << "Введите исходный ключ в двоичном виде, включая контрольные биты" << endl;
+
+	for (int i = 0; i < 18; i++)
+	{
+		char a;
+		a = getchar();
+		if (a == '0') input_bit.push_back(false);
+		else
+			if (a == '1') input_bit.push_back(true);
+			else i--;
+	}
+	input_bit.erase(input_bit.begin() + 8); //удаление контрольных битов
+	input_bit.erase(input_bit.begin() + 16);
+
+	for (int i = 0; i < 4; i++)
+	{
+		if (i == 2) {
+			flag = true;
+		}
+		stirring(G, input_bit);
+		cout << "Перемешивание на основе матрицы G: ";
+		print(input_bit);
+
+		shift(input_bit, flag);
+		cout << "Сдвиг относительно номера итерации: ";
+		print(input_bit);
+
+		stirring(H, input_bit);
+		cout << "Перемешивание на основе матрицы H: ";
+		print(input_bit);
+
+		cout << i + 1 << " ключ: ";
+		print(input_bit);
+		cout << endl;
+	}
+	system("pause");
+	return 0;
+}
